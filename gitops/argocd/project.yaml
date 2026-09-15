@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: togglemaster
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: togglemaster
+spec:
+  description: "ToggleMaster feature-flag platform — all microservices"
+
+  # Allow sync from the monorepo (update with your real GitHub repo URL)
+  sourceRepos:
+    - "https://github.com/RussoAndre/fiapandrerusso.git"
+
+  # Allow deployment only to the togglemaster namespace
+  destinations:
+    - namespace: togglemaster
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+
+  # Permitted Kubernetes resource kinds
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+
+  namespaceResourceWhitelist:
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: "autoscaling"
+      kind: HorizontalPodAutoscaler
+    - group: ""
+      kind: ConfigMap
+
+  # Prevent accidental orphan resource deletion
+  orphanedResources:
+    warn: true

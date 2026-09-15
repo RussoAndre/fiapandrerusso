@@ -1,0 +1,40 @@
+# golangci-lint configuration
+# Docs: https://golangci-lint.run/usage/configuration/
+
+run:
+  timeout: 5m
+  go: "1.21"
+
+linters:
+  enable:
+    - errcheck       # check for unchecked errors
+    - gosimple       # simplification suggestions
+    - govet          # go vet checks
+    - ineffassign    # detects ineffectual assignments
+    - staticcheck    # advanced static analysis
+    - unused         # check for unused code
+    - gofmt          # formatting
+    - goimports      # import ordering
+    - gosec          # security checks
+    - bodyclose      # ensure response bodies are closed
+    - noctx          # detect http requests without context
+    - exhaustive     # check exhaustiveness of enum switches
+
+linters-settings:
+  gosec:
+    severity: medium
+    confidence: medium
+
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+
+issues:
+  exclude-rules:
+    # Test files are allowed to have unused variables, etc.
+    - path: "_test\\.go"
+      linters:
+        - errcheck
+        - gosec
+  max-issues-per-linter: 50
+  max-same-issues: 5
