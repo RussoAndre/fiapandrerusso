@@ -151,5 +151,7 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "chore(gitops): update ${{ inputs.service }} to v1.0.0-${GITHUB_SHA:0:8}"
+            # pull --rebase antes do push para evitar conflito quando multiplos servicos rodam ao mesmo tempo
+            git pull --rebase origin main
             git push
           fi
