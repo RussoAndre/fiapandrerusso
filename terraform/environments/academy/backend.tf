@@ -21,11 +21,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "togglemaster-tfstate-REPLACE_ACCOUNT_ID"
+    bucket         = "togglemaster-tfstate-308603596306"
     key            = "academy/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
-    use_lockfile   = true   # native S3 locking (Terraform >= 1.10) — no DynamoDB needed
   }
 }
 

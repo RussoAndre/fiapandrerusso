@@ -16,21 +16,22 @@ resource "aws_eks_cluster" "main" {
     endpoint_public_access  = true
   }
 
-  # Encrypt secrets at rest using the default AWS-managed key.
-  encryption_config {
-    resources = ["secrets"]
-    provider {
-      key_arn = var.kms_key_arn != "" ? var.kms_key_arn : null
+  # Encrypt secrets at rest — only when a KMS key ARN is provided.
+  # AWS Academy does not allow creating KMS keys, so this block is skipped
+  # by default (kms_key_arn = "").
+  dynamic "encryption_config" {
+    for_each = var.kms_key_arn != "" ? [1] : []
+    content {
+      resources = ["secrets"]
+      provider {
+        key_arn = var.kms_key_arn
+      }
     }
   }
 
   enabled_cluster_log_types = ["api", "audit", "authenticator"]
 
   tags = merge(var.tags, { Name = var.cluster_name })
-
-  lifecycle {
-    ignore_changes = [encryption_config]
-  }
 }
 
 # ── Node Group ────────────────────────────────────────────────────────────────
@@ -55,11 +56,4 @@ resource "aws_eks_node_group" "main" {
   }
 
   tags = merge(var.tags, { Name = "${var.cluster_name}-node-group" })
-}
-
-# ── aws-auth ConfigMap (grants node role access to the cluster) ───────────────
-resource "aws_eks_access_entry" "nodes" {
-  cluster_name  = aws_eks_cluster.main.name
-  principal_arn = var.node_role_arn
-  type          = "EC2_LINUX"
 }
