@@ -1,3 +1,3 @@
 module github.com/togglemaster/auth
 
-go 1.21
+go 1.24

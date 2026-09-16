@@ -1,3 +1,3 @@
 module github.com/togglemaster/flag
 
-go 1.21
+go 1.24

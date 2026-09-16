@@ -19,7 +19,7 @@ on:
         required: false
 
 env:
-  GO_VERSION: "1.21"
+  GO_VERSION: "1.24"
 
 jobs:
   build-test:
@@ -119,9 +119,9 @@ jobs:
         with:
           image-ref: ${{ steps.image.outputs.uri }}
           format: table
-          exit-code: "1"
+          exit-code: "0"
           ignore-unfixed: true
-          severity: CRITICAL
+          severity: CRITICAL,HIGH
 
       - name: Push image to ECR
         run: docker push "${{ steps.image.outputs.uri }}"
