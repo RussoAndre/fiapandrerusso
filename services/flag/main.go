@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"time"
 )
 
 type HealthResponse struct {
@@ -29,7 +30,9 @@ var (
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(HealthResponse{Status: "ok", Service: "flag"})
+	if err := json.NewEncoder(w).Encode(HealthResponse{Status: "ok", Service: "flag"}); err != nil {
+		http.Error(w, "encoding error", http.StatusInternalServerError)
+	}
 }
 
 func listFlagsHandler(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +44,9 @@ func listFlagsHandler(w http.ResponseWriter, r *http.Request) {
 		list = append(list, f)
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(list)
+	if err := json.NewEncoder(w).Encode(list); err != nil {
+		http.Error(w, "encoding error", http.StatusInternalServerError)
+	}
 }
 
 func getFlagHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +63,9 @@ func getFlagHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(f)
+	if err := json.NewEncoder(w).Encode(f); err != nil {
+		http.Error(w, "encoding error", http.StatusInternalServerError)
+	}
 }
 
 func main() {
@@ -72,8 +79,16 @@ func main() {
 	mux.HandleFunc("/flags", listFlagsHandler)
 	mux.HandleFunc("/flags/get", getFlagHandler)
 
+	srv := &http.Server{
+		Addr:         ":" + port,
+		Handler:      mux,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
 	log.Printf("flag service listening on :%s", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
 }

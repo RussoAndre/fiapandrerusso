@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type HealthResponse struct {
@@ -25,7 +26,9 @@ type TargetResponse struct {
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(HealthResponse{Status: "ok", Service: "targeting"})
+	if err := json.NewEncoder(w).Encode(HealthResponse{Status: "ok", Service: "targeting"}); err != nil {
+		http.Error(w, "encoding error", http.StatusInternalServerError)
+	}
 }
 
 func evaluateHandler(w http.ResponseWriter, r *http.Request) {
@@ -51,11 +54,9 @@ func evaluateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(TargetResponse{
-		UserID:  req.UserID,
-		Matched: matched,
-		Segment: segment,
-	})
+	if err := json.NewEncoder(w).Encode(TargetResponse{UserID: req.UserID, Matched: matched, Segment: segment}); err != nil {
+		http.Error(w, "encoding error", http.StatusInternalServerError)
+	}
 }
 
 func main() {
@@ -68,8 +69,16 @@ func main() {
 	mux.HandleFunc("/health", healthHandler)
 	mux.HandleFunc("/targeting/evaluate", evaluateHandler)
 
+	srv := &http.Server{
+		Addr:         ":" + port,
+		Handler:      mux,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
 	log.Printf("targeting service listening on :%s", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
 }

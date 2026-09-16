@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type HealthResponse struct {
@@ -24,7 +25,9 @@ type TokenResponse struct {
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(HealthResponse{Status: "ok", Service: "auth", Version: "1.0.0"})
+	if err := json.NewEncoder(w).Encode(HealthResponse{Status: "ok", Service: "auth", Version: "1.0.0"}); err != nil {
+		http.Error(w, "encoding error", http.StatusInternalServerError)
+	}
 }
 
 func tokenHandler(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +46,9 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder"
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(TokenResponse{Token: token})
+	if err := json.NewEncoder(w).Encode(TokenResponse{Token: token}); err != nil {
+		http.Error(w, "encoding error", http.StatusInternalServerError)
+	}
 }
 
 func main() {
@@ -56,8 +61,16 @@ func main() {
 	mux.HandleFunc("/health", healthHandler)
 	mux.HandleFunc("/auth/token", tokenHandler)
 
+	srv := &http.Server{
+		Addr:         ":" + port,
+		Handler:      mux,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
 	log.Printf("auth service listening on :%s", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
 }
