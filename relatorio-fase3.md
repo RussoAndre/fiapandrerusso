@@ -17,7 +17,7 @@
 | Recurso | Link |
 |---|---|
 | **Repositório GitHub** | https://github.com/RussoAndre/fiapandrerusso |
-| **Vídeo de Apresentação** | ⚠️ _PREENCHER APÓS GRAVAÇÃO_ |
+| **Vídeo de Apresentação** | https://youtu.be/BghXJYfX8lQ |
 
 ---
 
