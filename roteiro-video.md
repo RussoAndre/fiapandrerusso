@@ -30,7 +30,7 @@ Abra no navegador: http://ad09d3842935245a9acdfa770c6394f2-1370995865.us-east-1.
 **4. Deixe estas abas abertas no navegador:**
 - Aba 1: GitHub Actions → https://github.com/RussoAndre/fiapandrerusso/actions
 - Aba 2: ArgoCD → http://ad09d3842935245a9acdfa770c6394f2-1370995865.us-east-1.elb.amazonaws.com
-- Aba 3: Console AWS → https://console.aws.amazon.com (região us-east-1)
+- Aba 3: Console AWS → abra pelo botão "AWS" dentro do Learner Lab do Academy (NÃO acesse console.aws.amazon.com diretamente — no Academy o login é feito pelo próprio painel)
 - Aba 4: Repositório GitHub → https://github.com/RussoAndre/fiapandrerusso
 
 **5. Abra o VS Code com o projeto:**
@@ -449,7 +449,7 @@ git push origin main
 | GitHub Actions | https://github.com/RussoAndre/fiapandrerusso/actions |
 | Repositório | https://github.com/RussoAndre/fiapandrerusso |
 | ArgoCD | http://ad09d3842935245a9acdfa770c6394f2-1370995865.us-east-1.elb.amazonaws.com |
-| Console AWS | https://us-east-1.console.aws.amazon.com |
+| Console AWS | Abrir pelo botão "AWS" no Learner Lab do Academy |
 
 ## ArgoCD
 
