@@ -11,6 +11,7 @@ import (
 type HealthResponse struct {
 	Status  string `json:"status"`
 	Service string `json:"service"`
+	Version string `json:"version"`
 }
 
 // TokenRequest holds the login payload.
@@ -26,7 +27,7 @@ type TokenResponse struct {
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(HealthResponse{Status: "ok", Service: "auth"})
+	json.NewEncoder(w).Encode(HealthResponse{Status: "ok", Service: "auth", Version: "1.0.0"})
 }
 
 // tokenHandler issues a fake JWT-like token for demonstration purposes.

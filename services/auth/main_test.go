@@ -28,6 +28,9 @@ func TestHealthHandler(t *testing.T) {
 	if resp.Service != "auth" {
 		t.Errorf("expected service 'auth', got '%s'", resp.Service)
 	}
+	if resp.Version != "1.0.0" {
+		t.Errorf("expected version '1.0.0', got '%s'", resp.Version)
+	}
 }
 
 func TestTokenHandler_Success(t *testing.T) {
