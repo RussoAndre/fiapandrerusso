@@ -3,263 +3,465 @@
 
 ---
 
-## Antes de gravar
+## ANTES DE GRAVAR — Preparação (faça isso antes de apertar REC)
 
-Deixe tudo aberto e pronto:
-- Terminal na pasta `togglemaster/terraform/environments/academy`
-- GitHub Actions aberto: https://github.com/RussoAndre/fiapandrerusso/actions
-- ArgoCD aberto: http://ad09d3842935245a9acdfa770c6394f2-1370995865.us-east-1.elb.amazonaws.com
-- Console AWS aberto em us-east-1: https://console.aws.amazon.com
-- Editor de código (VS Code) com o projeto aberto
+**1. Renove as credenciais do AWS Academy:**
+- Acesse o AWS Academy no navegador
+- Clique em "Start Lab" se não estiver rodando
+- Clique em "AWS Details" → "Show" ao lado de "AWS CLI"
+- No terminal, cole as credenciais:
 
-Renove as credenciais do AWS Academy antes de começar (Show → copiar).
-
----
-
-## PARTE 1 — Apresentação (1 min)
-
-**Fale:** "Olá, meu nome é André Russo, RM 373828. Neste vídeo vou demonstrar o Tech Challenge da Fase 3 da POSTECH, que cobre Infraestrutura como Código com Terraform, pipeline DevSecOps com GitHub Actions e GitOps com ArgoCD."
-
-**Mostre:** O repositório no GitHub — https://github.com/RussoAndre/fiapandrerusso
-
-**Fale:** "O projeto é o ToggleMaster, uma plataforma de feature flags composta por 5 microsserviços em Go: auth, flag, targeting, evaluation e analytics."
-
----
-
-## PARTE 2 — IaC: Terraform (4–5 min)
-
-### 2.1 — Mostrar o código
-
-**Abra o VS Code** e navegue pela estrutura:
-
-```
-terraform/
-  modules/
-    networking/   ← VPC, subnets, IGW, NAT
-    eks/          ← Cluster Kubernetes
-    databases/    ← RDS, Redis, DynamoDB
-    messaging/    ← SQS
-    ecr/          ← Repositórios de imagem
-  environments/
-    academy/      ← main.tf, backend.tf, variables.tf
-```
-
-**Fale:** "O Terraform está organizado em módulos independentes. O ambiente academy referencia todos eles e usa a LabRole existente do AWS Academy, sem criar nenhuma IAM role."
-
-Abra `terraform/environments/academy/main.tf` e mostre a linha:
-```hcl
-data "aws_iam_role" "lab_role" {
-  name = "LabRole"
-}
-```
-
-**Fale:** "Aqui referencio a LabRole via data source — isso é necessário porque o AWS Academy não permite criar roles de IAM."
-
-Abra `terraform/environments/academy/backend.tf` e mostre:
-
-**Fale:** "O estado do Terraform é armazenado remotamente em um bucket S3, com criptografia habilitada. Isso garante que o estado não fique local na máquina de nenhum desenvolvedor."
-
-### 2.2 — Mostrar o terraform plan rodando
-
-**No terminal**, execute:
 ```bash
-cd /Users/russondr/Documents/Faculdade/togglemaster/terraform/environments/academy
+export AWS_ACCESS_KEY_ID=ASIA...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_SESSION_TOKEN=...
+```
+
+**2. Atualize o kubeconfig:**
+```bash
+aws eks update-kubeconfig --name togglemaster-cluster --region us-east-1
+```
+
+**3. Confirme que o ArgoCD está respondendo:**
+Abra no navegador: http://ad09d3842935245a9acdfa770c6394f2-1370995865.us-east-1.elb.amazonaws.com
+- Login: `admin`
+- Senha: `5PMqK93FxOSbQdTx`
+
+**4. Deixe estas abas abertas no navegador:**
+- Aba 1: GitHub Actions → https://github.com/RussoAndre/fiapandrerusso/actions
+- Aba 2: ArgoCD → http://ad09d3842935245a9acdfa770c6394f2-1370995865.us-east-1.elb.amazonaws.com
+- Aba 3: Console AWS → https://console.aws.amazon.com (região us-east-1)
+- Aba 4: Repositório GitHub → https://github.com/RussoAndre/fiapandrerusso
+
+**5. Abra o VS Code com o projeto:**
+```bash
+code /Users/russondr/Documents/Faculdade/togglemaster
+```
+
+**6. Abra dois terminais lado a lado:**
+- Terminal 1: na pasta raiz do projeto
+- Terminal 2: na pasta `terraform/environments/academy`
+
+**7. Confirme que o pipeline mais recente está verde:**
+- Acesse https://github.com/RussoAndre/fiapandrerusso/actions
+- Deve aparecer pelo menos um run com ✅ verde
+
+---
+
+## PARTE 1 — Apresentação (1 minuto)
+
+**[CÂMERA ou TELA — mostre o repositório GitHub aberto]**
+
+**FALE:**
+> "Olá, meu nome é André Russo, RM 373828. Neste vídeo apresento o Tech Challenge da Fase 3 da POSTECH, que cobre três temas principais: Infraestrutura como Código com Terraform, pipeline de CI/CD com DevSecOps usando GitHub Actions, e entrega contínua com GitOps usando ArgoCD."
+
+**[Mostre a tela do repositório: https://github.com/RussoAndre/fiapandrerusso]**
+
+**FALE:**
+> "O projeto se chama ToggleMaster, uma plataforma de feature flags composta por cinco microsserviços em Go: auth, flag, targeting, evaluation e analytics. Vou mostrar cada parte funcionando."
+
+**[No VS Code, clique na pasta `services/` para expandir e mostrar os 5 serviços]**
+
+---
+
+## PARTE 2 — Infraestrutura como Código com Terraform (4–5 minutos)
+
+### 2.1 — Mostrar a estrutura do código Terraform
+
+**[No VS Code, clique na pasta `terraform/` para expandir]**
+
+**FALE:**
+> "A infraestrutura está organizada em módulos independentes dentro da pasta terraform. Cada módulo é responsável por um conjunto de recursos."
+
+**[Clique para expandir `terraform/modules/`]**
+
+**FALE enquanto aponta para cada pasta:**
+> "O módulo networking cria a VPC, as subnets públicas e privadas, o Internet Gateway e o NAT Gateway. O módulo eks provisiona o cluster Kubernetes. O módulo databases cria as três instâncias RDS PostgreSQL, o ElastiCache Redis e a tabela DynamoDB. O módulo messaging cria a fila SQS com dead-letter queue. E o módulo ecr cria os repositórios de imagens Docker."
+
+**[Clique em `terraform/environments/academy/main.tf` para abrir o arquivo]**
+
+**FALE:**
+> "O ambiente academy conecta todos os módulos. Uma decisão importante aqui foi a questão do IAM no AWS Academy."
+
+**[Role o arquivo até a linha com `data "aws_iam_role"`]**
+
+**FALE:**
+> "O AWS Academy não permite criar IAM roles. A solução foi usar um data source do Terraform para referenciar a LabRole já existente na conta, e passá-la tanto para o cluster EKS quanto para os node groups. Nenhuma role nova é criada."
+
+**[Clique em `terraform/environments/academy/backend.tf`]**
+
+**FALE:**
+> "O estado do Terraform não fica local. Ele é armazenado remotamente em um bucket S3 com criptografia habilitada. Isso é fundamental para trabalho em equipe — qualquer pessoa pode rodar o Terraform e vai trabalhar com o estado atualizado."
+
+### 2.2 — Rodar o terraform plan
+
+**[Mude para o Terminal 2, que está em `terraform/environments/academy`]**
+
+**FALE:**
+> "Vou rodar o terraform plan para mostrar o estado atual da infraestrutura."
+
+**Digite e execute:**
+```bash
 terraform plan -var='db_password=ToggleMaster2024Secure'
 ```
 
-**Fale enquanto o output aparece:** "O plan mostra todos os recursos que serão criados — VPC, subnets, cluster EKS, instâncias RDS, Redis, DynamoDB, SQS e os repositórios ECR."
+**[Aguarde o output aparecer — leva cerca de 10 segundos]**
 
-Quando aparecer a linha final, mostre ela na tela:
+**FALE enquanto o output aparece:**
+> "O Terraform lê o estado remoto no S3, consulta a AWS para ver o que já existe, e compara com o código. Como a infraestrutura já foi aplicada, ele confirma que tudo está sincronizado."
+
+**[Quando aparecer a linha final, aponte para ela na tela:]**
 ```
-Plan: X to add, 0 to change, 0 to destroy.
+No changes. Your infrastructure matches the configuration.
 ```
 
-**Fale:** "Como a infraestrutura já foi aplicada anteriormente, o plan confirma que está tudo sincronizado."
+**FALE:**
+> "Perfeito. Nenhuma mudança necessária — o que está no código é exatamente o que está rodando na AWS."
 
-### 2.3 — Mostrar a infraestrutura no console AWS
+### 2.3 — Mostrar os recursos no Console AWS
 
-**Abra o Console AWS** e mostre rapidamente:
+**[Troque para o navegador, abra o Console AWS na região us-east-1]**
 
-1. **VPC** → Services → VPC → Your VPCs → mostrar `togglemaster-vpc`
-2. **EKS** → Services → EKS → Clusters → mostrar `togglemaster-cluster` com status Active
-3. **RDS** → Services → RDS → Databases → mostrar as 3 instâncias (auth-db, flag-db, analytics-db)
-4. **ElastiCache** → Services → ElastiCache → mostrar `togglemaster-redis`
-5. **DynamoDB** → Services → DynamoDB → Tables → mostrar `ToggleMasterAnalytics`
-6. **SQS** → Services → SQS → mostrar `togglemaster-events`
-7. **ECR** → Services → ECR → Repositories → mostrar os 5 repositórios
+**[Acesse VPC: clique em Services → VPC → Your VPCs]**
 
-**Fale em cada um:** "Aqui está o [nome do recurso] criado pelo Terraform, com as tags `ManagedBy: terraform` e `Environment: academy`."
+**FALE:**
+> "Aqui está a VPC criada pelo Terraform, a togglemaster-vpc, com o CIDR 10.0.0.0/16."
+
+**[Clique em Subnets no menu lateral]**
+
+**FALE:**
+> "Quatro subnets criadas — duas públicas e duas privadas, distribuídas em duas zonas de disponibilidade para alta disponibilidade."
+
+**[Acesse EKS: clique em Services, pesquise EKS, clique em Clusters]**
+
+**FALE:**
+> "O cluster EKS togglemaster-cluster, rodando Kubernetes 1.32, com status Active."
+
+**[Clique no cluster para abrir os detalhes, depois em Compute → Node groups]**
+
+**FALE:**
+> "O node group com duas instâncias t3.medium rodando. Esses nós são onde os pods dos microsserviços vão rodar."
+
+**[Acesse RDS: clique em Services → RDS → Databases]**
+
+**FALE:**
+> "Três instâncias PostgreSQL 17.5 criadas — uma para cada microsserviço que precisa de banco relacional: auth, flag e analytics."
+
+**[Acesse ElastiCache: clique em Services → ElastiCache → Redis caches]**
+
+**FALE:**
+> "O cluster Redis para cache distribuído."
+
+**[Acesse DynamoDB: clique em Services → DynamoDB → Tables]**
+
+**FALE:**
+> "A tabela ToggleMasterAnalytics no DynamoDB, com billing PAY_PER_REQUEST, para armazenar eventos de analytics sem precisar provisionar capacidade."
+
+**[Acesse SQS: clique em Services → SQS]**
+
+**FALE:**
+> "A fila SQS togglemaster-events para comunicação assíncrona entre os serviços, com uma dead-letter queue para mensagens que falham."
+
+**[Acesse ECR: clique em Services → ECR → Repositories]**
+
+**FALE:**
+> "E os cinco repositórios ECR, um para cada microsserviço. Todos com scan automático de vulnerabilidades habilitado no push."
 
 ---
 
-## PARTE 3 — Pipeline DevSecOps (5–6 min)
+## PARTE 3 — Pipeline DevSecOps com GitHub Actions (5–6 minutos)
 
-### 3.1 — Mostrar o pipeline passando
+### 3.1 — Mostrar a estrutura do pipeline
 
-**Abra o GitHub Actions:** https://github.com/RussoAndre/fiapandrerusso/actions
+**[No VS Code, expanda `.github/workflows/`]**
 
-Clique no run mais recente que passou (verde) do serviço auth ou flag.
+**FALE:**
+> "O pipeline está definido em GitHub Actions. Existe um template reutilizável que é chamado pelos cinco workflows — um por microsserviço. Isso evita duplicação de código."
 
-**Mostre os 4 estágios verdes:**
+**[Clique em `_ci-template.yml` para abrir]**
 
-**Fale:** "O pipeline tem 4 estágios. Primeiro, Build e Testes — compila o código Go e roda os testes unitários com detecção de race conditions."
+**FALE:**
+> "O pipeline tem quatro estágios em sequência. Primeiro o build e testes, depois o lint, depois o security scan, e por último o docker build e push. Cada estágio depende do anterior — se um falha, os seguintes não rodam."
 
-Clique em **Build & Test** para expandir e mostrar os logs passando.
+**[Role até o job `sast-sca` e mostre as linhas do Trivy]**
 
-**Fale:** "Segundo, o Lint com golangci-lint, verificando qualidade e segurança do código."
+**FALE:**
+> "No estágio de segurança, rodamos dois scanners. O gosec faz análise estática do código-fonte Go, procurando padrões inseguros. O Trivy verifica vulnerabilidades nas dependências. E aqui está a regra mais importante: exit-code 1 com severidade CRITICAL. Se o Trivy encontrar qualquer CVE crítico, o pipeline para aqui e a imagem não é publicada."
 
-**Fale:** "Terceiro, o Security Scan — aqui rodamos o gosec para análise estática de segurança no código-fonte, e o Trivy para verificar vulnerabilidades nas dependências."
+### 3.2 — Mostrar um pipeline passando
 
-Clique em **Security Scan** para mostrar o output do Trivy com `0 vulnerabilities`.
+**[Troque para o navegador, abra GitHub Actions: https://github.com/RussoAndre/fiapandrerusso/actions]**
 
-**Fale:** "Quarto, o Docker Build and Push — a imagem é construída, passa por um scan de container com Trivy, e é publicada no ECR com a tag do commit."
+**FALE:**
+> "Aqui estão os runs do pipeline. Vou abrir o run mais recente que passou com sucesso."
 
-### 3.2 — Demonstrar o bloqueio por vulnerabilidade (cena principal do DevSecOps)
+**[Clique no run mais recente com ✅ verde]**
 
-**Fale:** "Agora vou demonstrar o que acontece quando uma vulnerabilidade crítica é introduzida."
+**FALE:**
+> "Podemos ver os quatro jobs: Build and Test, Lint, Security Scan e Docker Build and Push."
 
-**No terminal**, execute:
+**[Clique em "Build & Test (auth)" para expandir]**
+
+**FALE:**
+> "No build, o código é compilado e os testes unitários são executados com a flag race para detectar condições de corrida."
+
+**[Clique em "Security Scan (auth)" para expandir, role até o output do Trivy]**
+
+**FALE:**
+> "No security scan, o Trivy fez a varredura do código e das dependências e não encontrou vulnerabilidades críticas. O pipeline continuou."
+
+**[Clique em "Docker Build & Push (auth)" para expandir]**
+
+**FALE:**
+> "No último estágio, a imagem Docker foi construída, passou pelo scan de container, e foi publicada no ECR com a tag baseada no hash do commit — aqui vemos o hash exato, garantindo rastreabilidade completa."
+
+### 3.3 — Demonstrar o bloqueio por vulnerabilidade CRÍTICA
+
+**FALE:**
+> "Agora vou mostrar o que acontece quando uma vulnerabilidade crítica é introduzida no código. Isso simula um cenário real onde um desenvolvedor adiciona uma dependência comprometida."
+
+**[Troque para o Terminal 1, na raiz do projeto]**
+
+**Digite e execute:**
 ```bash
-cd /Users/russondr/Documents/Faculdade/togglemaster
 git checkout -b demo/security-failure
 ```
 
-Abra `services/auth/go.mod` no VS Code e adicione no final:
+**[No VS Code, abra o arquivo `services/auth/go.mod`]**
+
+O arquivo atual se parece com isso:
+```
+module github.com/togglemaster/auth
+
+go 1.24
+```
+
+**Adicione uma linha no final do arquivo:**
 ```
 require golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 ```
 
-**No terminal:**
+**FALE enquanto digita:**
+> "Vou adicionar uma versão muito antiga da biblioteca crypto do Go — de 2019 — que contém vulnerabilidades conhecidas e catalogadas."
+
+**[Salve o arquivo com Cmd+S]**
+
+**[No terminal, execute:]**
 ```bash
 git add services/auth/go.mod
 git commit -m "feat: add crypto dependency"
 git push origin demo/security-failure
 ```
 
-**Abra o GitHub Actions** e aguarde o workflow `Demo — Security Block` aparecer.
+**[Troque para o navegador, abra GitHub Actions]**
 
-**Fale enquanto aguarda:** "Adicionei uma versão antiga e vulnerável da biblioteca `golang.org/x/crypto`, que contém CVEs conhecidos. O pipeline está rodando agora."
+**FALE enquanto aguarda:**
+> "O workflow demo-security-block foi disparado automaticamente. Ele vai rodar o mesmo processo de security scan na branch de demo. Aguardando o resultado..."
 
-Quando o job **Security Gate** ficar vermelho, clique nele e mostre o log do Trivy com a vulnerabilidade CRÍTICA detectada.
+**[Quando o job "Security Gate" ficar vermelho — clique nele]**
 
-**Fale:** "O pipeline falhou exatamente no estágio de segurança, como esperado. A imagem não foi publicada no ECR e o deploy foi bloqueado automaticamente. Agora vou reverter a mudança."
+**[Role até o output do Trivy no log]**
 
-**No terminal:**
+**FALE apontando para a tabela de vulnerabilidades:**
+> "O Trivy encontrou uma vulnerabilidade classificada como CRÍTICA na dependência que adicionamos. O pipeline falhou com exit code 1 exatamente no estágio de segurança. A imagem não foi construída, não foi publicada no ECR, e nenhum deploy aconteceu. O sistema bloqueou automaticamente."
+
+**[Mostre na tela o job vermelho com a mensagem de falha]**
+
+**FALE:**
+> "Agora vou reverter a mudança e mostrar o pipeline passando novamente."
+
+**[No terminal, execute:]**
 ```bash
 git revert HEAD --no-edit
 git push origin demo/security-failure
 ```
 
-Mostre o pipeline passando novamente.
+**[No GitHub Actions, aguarde o novo run aparecer e ficar verde]**
 
-**Fale:** "Com a dependência vulnerável removida, o pipeline passa e a imagem é liberada para deploy."
+**FALE:**
+> "Com a dependência vulnerável removida, o pipeline passou em todos os estágios. Isso é o DevSecOps funcionando — segurança integrada ao fluxo de desenvolvimento, não como uma etapa manual depois."
 
-Volte para main:
+**[Volte para a branch main:]**
 ```bash
 git checkout main
 ```
 
-### 3.3 — Mostrar a imagem publicada no ECR
-
-**No Console AWS**, vá em ECR → togglemaster/auth → mostrar a imagem com a tag `v1.0.0-xxxxxxxx`.
-
-**Fale:** "A imagem foi publicada com a tag baseada no hash do commit, garantindo rastreabilidade total."
-
 ---
 
-## PARTE 4 — GitOps com ArgoCD (3–4 min)
+## PARTE 4 — GitOps com ArgoCD (3–4 minutos)
 
-### 4.1 — Mostrar o ArgoCD com os 5 serviços
+### 4.1 — Mostrar o ArgoCD com os 5 microsserviços
 
-**Abra o ArgoCD:** http://ad09d3842935245a9acdfa770c6394f2-1370995865.us-east-1.elb.amazonaws.com
+**[Troque para o navegador, abra o ArgoCD]**
+
+URL: http://ad09d3842935245a9acdfa770c6394f2-1370995865.us-east-1.elb.amazonaws.com
 
 Login: `admin` / `5PMqK93FxOSbQdTx`
 
-**Fale:** "O ArgoCD está instalado no cluster EKS e gerencia os 5 microsserviços do ToggleMaster. Cada serviço tem sua própria Application configurada."
+**FALE:**
+> "O ArgoCD está instalado dentro do próprio cluster EKS e gerencia todos os microsserviços via GitOps."
 
-Mostre a tela principal com os 5 cards: auth, flag, targeting, evaluation, analytics.
+**[Mostre a tela principal com os 5 cards de aplicações]**
 
-**Fale:** "O status Synced significa que o estado do cluster está sincronizado com o repositório Git."
+**FALE:**
+> "Aqui estão as cinco Applications do ArgoCD — uma por microsserviço. Cada uma monitora uma pasta específica do repositório Git e mantém o cluster sincronizado com o que está no código."
 
-Clique em um dos apps, por exemplo **togglemaster-auth**, e mostre a árvore de recursos (Deployment, Service, HPA).
+**[Clique em "togglemaster-auth" para abrir os detalhes]**
 
-### 4.2 — Mostrar o GitOps em ação
+**FALE:**
+> "Dentro de cada Application, o ArgoCD mostra todos os recursos Kubernetes que ela gerencia: o Deployment, o Service e o HorizontalPodAutoscaler."
 
-**Fale:** "Vou demonstrar o fluxo completo de GitOps. Faço uma mudança no código, o pipeline CI atualiza a tag da imagem no repositório, e o ArgoCD detecta e sincroniza automaticamente."
+**[Mostre a árvore de recursos na tela]**
 
-**No VS Code**, abra `services/flag/main.go` e faça uma mudança pequena — por exemplo, adicione uma flag nova no map:
+**FALE:**
+> "O status Synced significa que o que está rodando no cluster é exatamente o que está no repositório Git. Se alguém fizer uma mudança manual no cluster — como um kubectl apply direto — o ArgoCD detecta o drift e reverte automaticamente."
 
+### 4.2 — Demonstrar o fluxo GitOps completo
+
+**FALE:**
+> "Vou demonstrar o fluxo completo do GitOps. Faço uma mudança no código, o pipeline CI processa e atualiza a tag da imagem no repositório, e o ArgoCD detecta e sincroniza no cluster — tudo automaticamente, sem nenhum kubectl apply manual."
+
+**[No VS Code, abra `services/flag/main.go`]**
+
+**[Encontre o map de flags e adicione uma linha nova:]**
+
+Antes:
 ```go
-"analytics-v2": {Key: "analytics-v2", Enabled: false},
+flags = map[string]Flag{
+    "new-ui":      {Key: "new-ui", Enabled: true},
+    "dark-mode":   {Key: "dark-mode", Enabled: false},
+    "beta-search": {Key: "beta-search", Enabled: false},
+}
 ```
 
-**No terminal:**
+Depois (adicione a última linha):
+```go
+flags = map[string]Flag{
+    "new-ui":        {Key: "new-ui", Enabled: true},
+    "dark-mode":     {Key: "dark-mode", Enabled: false},
+    "beta-search":   {Key: "beta-search", Enabled: false},
+    "analytics-v2":  {Key: "analytics-v2", Enabled: false},
+}
+```
+
+**[Salve com Cmd+S]**
+
+**[No terminal:]**
 ```bash
 git add services/flag/main.go
-git commit -m "feat(flag): add analytics-v2 flag"
+git commit -m "feat(flag): add analytics-v2 feature flag"
 git push origin main
 ```
 
-**Abra o GitHub Actions** e mostre o pipeline do `flag` rodando.
+**[Troque para o navegador, abra GitHub Actions]**
 
-**Fale:** "O pipeline está rodando — build, lint, security scan, docker build e push."
+**FALE:**
+> "O push disparou o pipeline do serviço flag. Vou acompanhar os estágios."
 
-Quando chegar no estágio **Update GitOps**, mostre ele rodando.
+**[Clique no run que acabou de aparecer]**
 
-**Fale:** "Nesse último estágio, o pipeline atualiza automaticamente o arquivo `gitops/apps/flag/deployment.yaml` com a nova tag da imagem e faz um commit no repositório."
+**FALE:**
+> "Build passando... Lint passando... Security scan passando... Docker build e push."
 
-Abra o repositório no GitHub e mostre o commit feito pelo `github-actions[bot]` no arquivo `gitops/apps/flag/deployment.yaml`.
+**[Quando chegar no job "Update GitOps", clique nele para expandir]**
 
-**Volte ao ArgoCD** e aguarde aparecer a notificação de sync (pode levar 1–3 minutos).
+**FALE:**
+> "Esse é o estágio final do pipeline. Depois de publicar a imagem no ECR, o pipeline atualiza automaticamente o arquivo deployment.yaml no repositório Git com a nova tag da imagem, e faz um commit."
 
-**Fale:** "O ArgoCD detectou a mudança no repositório Git e está sincronizando automaticamente a nova versão no cluster."
+**[Aguarde o job terminar, depois vá para a aba do repositório GitHub]**
 
-Mostre o app `togglemaster-flag` com status **Syncing** e depois **Synced**.
+**[Clique em "gitops" → "apps" → "flag" → "deployment.yaml"]**
+
+**[Clique em "History" ou veja os commits recentes do arquivo]**
+
+**FALE:**
+> "Aqui está o commit feito automaticamente pelo github-actions bot, atualizando a tag da imagem para a versão que acabou de ser publicada."
+
+**[Volte ao ArgoCD]**
+
+**FALE:**
+> "O ArgoCD monitora o repositório a cada 3 minutos por padrão. Vou forçar uma sincronização para mostrar em tempo real."
+
+**[Clique em "togglemaster-flag"]**
+
+**[Clique no botão "SYNC" no topo da página]**
+
+**[Clique em "SYNCHRONIZE" na confirmação]**
+
+**FALE enquanto sincroniza:**
+> "O ArgoCD está aplicando o novo deployment com a imagem atualizada no cluster. Esse é o GitOps em ação — o repositório Git é a única fonte de verdade, e o cluster sempre converge para o estado definido no código."
+
+**[Mostre o status mudando para Synced com o ícone verde]**
+
+**FALE:**
+> "Sincronizado. A nova versão está rodando no cluster."
 
 ---
 
-## PARTE 5 — Encerramento (30 seg)
+## PARTE 5 — Encerramento (30 segundos)
 
-**Fale:** "Para finalizar, toda a infraestrutura foi provisionada via Terraform com estado remoto em S3, o pipeline DevSecOps garante que vulnerabilidades críticas bloqueiam o deploy automaticamente, e o GitOps com ArgoCD mantém o cluster sempre sincronizado com o repositório. Obrigado."
+**[Mostre rapidamente as quatro abas abertas: VS Code, Actions, ArgoCD, Console AWS]**
+
+**FALE:**
+> "Para resumir: toda a infraestrutura é provisionada e versionada com Terraform, com estado remoto no S3. O pipeline DevSecOps garante que nenhuma imagem com vulnerabilidade crítica chega ao ambiente. E o GitOps com ArgoCD mantém o cluster sempre sincronizado com o repositório, sem deploys manuais. Obrigado."
 
 ---
 
-## Comandos de referência rápida
+## COMANDOS DE REFERÊNCIA RÁPIDA
+
+Cole esses comandos no terminal durante a gravação:
 
 ```bash
-# Entrar na pasta correta
-cd /Users/russondr/Documents/Faculdade/togglemaster
+# Antes de gravar — renovar credenciais
+export AWS_ACCESS_KEY_ID=ASIA...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_SESSION_TOKEN=...
+aws eks update-kubeconfig --name togglemaster-cluster --region us-east-1
 
 # Terraform plan
-cd terraform/environments/academy
+cd /Users/russondr/Documents/Faculdade/togglemaster/terraform/environments/academy
 terraform plan -var='db_password=ToggleMaster2024Secure'
 
 # Demo vulnerabilidade
+cd /Users/russondr/Documents/Faculdade/togglemaster
 git checkout -b demo/security-failure
-# (editar services/auth/go.mod)
-git add services/auth/go.mod && git commit -m "test: dep vulneravel" && git push origin demo/security-failure
+# (editar services/auth/go.mod — adicionar a linha require)
+git add services/auth/go.mod
+git commit -m "feat: add crypto dependency"
+git push origin demo/security-failure
+# (aguardar pipeline falhar, mostrar o log)
+git revert HEAD --no-edit
+git push origin demo/security-failure
+git checkout main
 
 # Demo GitOps
-git checkout main
-# (editar services/flag/main.go)
-git add services/flag/main.go && git commit -m "feat(flag): nova flag" && git push origin main
-
-# Ver nodes do cluster
-aws eks update-kubeconfig --name togglemaster-cluster --region us-east-1
-kubectl get nodes
-kubectl get pods -n togglemaster
+# (editar services/flag/main.go — adicionar analytics-v2 flag)
+git add services/flag/main.go
+git commit -m "feat(flag): add analytics-v2 feature flag"
+git push origin main
+# (acompanhar pipeline e depois ArgoCD)
 ```
 
-## URLs importantes
+## URLs IMPORTANTES
 
-| Recurso | URL |
+| | URL |
 |---|---|
 | GitHub Actions | https://github.com/RussoAndre/fiapandrerusso/actions |
+| Repositório | https://github.com/RussoAndre/fiapandrerusso |
 | ArgoCD | http://ad09d3842935245a9acdfa770c6394f2-1370995865.us-east-1.elb.amazonaws.com |
-| Console AWS | https://console.aws.amazon.com |
-| ECR | https://us-east-1.console.aws.amazon.com/ecr/repositories |
+| Console AWS | https://us-east-1.console.aws.amazon.com |
 
-## ArgoCD login
+## ArgoCD
 
 - Usuário: `admin`
 - Senha: `5PMqK93FxOSbQdTx`
+
+## DICAS PARA A GRAVAÇÃO
+
+- Use o OBS ou QuickTime (Cmd+Shift+5 no Mac) para gravar a tela
+- Grave em resolução mínima 1080p
+- Fale devagar e claramente — é avaliação acadêmica
+- Se errar uma fala, pause, respire e continue — você pode editar depois
+- Não precisa mostrar o rosto, só a tela
+- Deixe os terminais com fonte maior (Cmd+= no Terminal) para facilitar a leitura
+- Antes de gravar a cena do Trivy falhando, confirme que o run anterior passou para ter contraste claro
