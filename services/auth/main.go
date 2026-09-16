@@ -7,20 +7,17 @@ import (
 	"os"
 )
 
-// HealthResponse is returned by the health check endpoint.
 type HealthResponse struct {
 	Status  string `json:"status"`
 	Service string `json:"service"`
 	Version string `json:"version"`
 }
 
-// TokenRequest holds the login payload.
 type TokenRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-// TokenResponse holds the issued token.
 type TokenResponse struct {
 	Token string `json:"token"`
 }
@@ -30,8 +27,6 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(HealthResponse{Status: "ok", Service: "auth", Version: "1.0.0"})
 }
 
-// tokenHandler issues a fake JWT-like token for demonstration purposes.
-// In production this would validate credentials against a database.
 func tokenHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -46,7 +41,6 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "username and password are required", http.StatusBadRequest)
 		return
 	}
-	// Placeholder token — replace with real signing logic.
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder"
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(TokenResponse{Token: token})

@@ -1,23 +1,16 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# Module: messaging
-# Provisions: 1 SQS queue (standard) + Dead-Letter Queue
-# ──────────────────────────────────────────────────────────────────────────────
-
-# ── Dead-Letter Queue ─────────────────────────────────────────────────────────
 resource "aws_sqs_queue" "dlq" {
   name                       = "${var.project}-events-dlq"
-  message_retention_seconds  = 1209600 # 14 days
+  message_retention_seconds  = 1209600
   visibility_timeout_seconds = 30
 
   tags = merge(var.tags, { Name = "${var.project}-events-dlq" })
 }
 
-# ── Main Events Queue ─────────────────────────────────────────────────────────
 resource "aws_sqs_queue" "events" {
   name                       = "${var.project}-events"
   visibility_timeout_seconds = 30
-  message_retention_seconds  = 86400 # 1 day
-  receive_wait_time_seconds  = 10    # long polling
+  message_retention_seconds  = 86400
+  receive_wait_time_seconds  = 10
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dlq.arn
@@ -27,7 +20,6 @@ resource "aws_sqs_queue" "events" {
   tags = merge(var.tags, { Name = "${var.project}-events" })
 }
 
-# ── Queue Policy: allow services within the account to send/receive ───────────
 data "aws_caller_identity" "current" {}
 
 resource "aws_sqs_queue_policy" "events" {

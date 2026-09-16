@@ -40,5 +40,5 @@ aws s3api put-public-access-block \
     BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
 
 echo ""
-echo "Done! Now update backend.tf replacing REPLACE_ACCOUNT_ID with: ${ACCOUNT_ID}"
+echo "Done! Now update backend.tf replacing 308603596306 with: ${ACCOUNT_ID}"
 echo "Then run: terraform init"

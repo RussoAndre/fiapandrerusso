@@ -1,8 +1,3 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# Module: ecr
-# Provisions: one ECR repository per microservice
-# ──────────────────────────────────────────────────────────────────────────────
-
 resource "aws_ecr_repository" "services" {
   for_each = toset(var.services)
 
@@ -13,7 +8,6 @@ resource "aws_ecr_repository" "services" {
     scan_on_push = true
   }
 
-  # Encrypt images at rest with the default AWS-managed key.
   encryption_configuration {
     encryption_type = "AES256"
   }
@@ -21,7 +15,6 @@ resource "aws_ecr_repository" "services" {
   tags = merge(var.tags, { Name = "${var.project}/${each.key}" })
 }
 
-# ── Lifecycle Policy: keep last 10 tagged images, delete untagged after 1 day ─
 resource "aws_ecr_lifecycle_policy" "services" {
   for_each   = aws_ecr_repository.services
   repository = each.value.name

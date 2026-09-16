@@ -8,19 +8,16 @@ import (
 	"sync"
 )
 
-// HealthResponse is returned by the health check endpoint.
 type HealthResponse struct {
 	Status  string `json:"status"`
 	Service string `json:"service"`
 }
 
-// Flag represents a feature flag.
 type Flag struct {
 	Key     string `json:"key"`
 	Enabled bool   `json:"enabled"`
 }
 
-// in-memory store for demo purposes.
 var (
 	mu    sync.RWMutex
 	flags = map[string]Flag{

@@ -35,7 +35,7 @@ spec:
               app: targeting
       containers:
         - name: targeting
-          image: REPLACE_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/togglemaster/targeting:v1.0.0-00000000
+          image: 308603596306.dkr.ecr.us-east-1.amazonaws.com/togglemaster/targeting:v1.0.0-00000000
           imagePullPolicy: Always
           ports:
             - name: http

@@ -1,10 +1,3 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# Module: eks
-# Provisions: EKS Cluster + Managed Node Group
-# AWS Academy: uses a pre-existing LabRole ARN (no IAM creation).
-# ──────────────────────────────────────────────────────────────────────────────
-
-# ── EKS Cluster ───────────────────────────────────────────────────────────────
 resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
   role_arn = var.cluster_role_arn
@@ -16,9 +9,6 @@ resource "aws_eks_cluster" "main" {
     endpoint_public_access  = true
   }
 
-  # Encrypt secrets at rest — only when a KMS key ARN is provided.
-  # AWS Academy does not allow creating KMS keys, so this block is skipped
-  # by default (kms_key_arn = "").
   dynamic "encryption_config" {
     for_each = var.kms_key_arn != "" ? [1] : []
     content {
@@ -34,7 +24,6 @@ resource "aws_eks_cluster" "main" {
   tags = merge(var.tags, { Name = var.cluster_name })
 }
 
-# ── Node Group ────────────────────────────────────────────────────────────────
 resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "${var.cluster_name}-nodes"

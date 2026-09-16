@@ -9,13 +9,11 @@ import (
 	"time"
 )
 
-// HealthResponse is returned by the health check endpoint.
 type HealthResponse struct {
 	Status  string `json:"status"`
 	Service string `json:"service"`
 }
 
-// Event represents a feature-flag evaluation event.
 type Event struct {
 	FlagKey   string    `json:"flag_key"`
 	UserID    string    `json:"user_id"`
@@ -23,11 +21,10 @@ type Event struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 
-// Summary aggregates counts per flag.
 type Summary struct {
-	FlagKey   string `json:"flag_key"`
-	TrueCount int    `json:"true_count"`
-	FalseCount int   `json:"false_count"`
+	FlagKey    string `json:"flag_key"`
+	TrueCount  int    `json:"true_count"`
+	FalseCount int    `json:"false_count"`
 }
 
 var (
@@ -40,7 +37,6 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(HealthResponse{Status: "ok", Service: "analytics"})
 }
 
-// trackHandler records an evaluation event.
 func trackHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -64,7 +60,6 @@ func trackHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-// summaryHandler returns aggregated counts per flag.
 func summaryHandler(w http.ResponseWriter, r *http.Request) {
 	mu.RLock()
 	defer mu.RUnlock()

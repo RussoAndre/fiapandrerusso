@@ -7,19 +7,16 @@ import (
 	"os"
 )
 
-// HealthResponse is returned by the health check endpoint.
 type HealthResponse struct {
 	Status  string `json:"status"`
 	Service string `json:"service"`
 }
 
-// TargetRequest describes a user/context to evaluate targeting rules against.
 type TargetRequest struct {
 	UserID  string            `json:"user_id"`
 	Context map[string]string `json:"context"`
 }
 
-// TargetResponse holds the targeting result.
 type TargetResponse struct {
 	UserID  string `json:"user_id"`
 	Matched bool   `json:"matched"`
@@ -31,7 +28,6 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(HealthResponse{Status: "ok", Service: "targeting"})
 }
 
-// evaluateHandler applies simple targeting rules (demo logic).
 func evaluateHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -47,7 +43,6 @@ func evaluateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Demo rule: users whose plan is "premium" are in the beta segment.
 	segment := "standard"
 	matched := false
 	if plan, ok := req.Context["plan"]; ok && plan == "premium" {

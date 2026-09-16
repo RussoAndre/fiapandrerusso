@@ -1,12 +1,3 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# Module: databases
-# Provisions:
-#   - 3 RDS PostgreSQL instances (auth, flag, analytics)
-#   - 1 ElastiCache Redis cluster
-#   - 1 DynamoDB table (ToggleMasterAnalytics)
-# ──────────────────────────────────────────────────────────────────────────────
-
-# ── Security Group: RDS ───────────────────────────────────────────────────────
 resource "aws_security_group" "rds" {
   name        = "${var.project}-rds-sg"
   description = "Allow PostgreSQL traffic from within VPC"
@@ -30,7 +21,6 @@ resource "aws_security_group" "rds" {
   tags = merge(var.tags, { Name = "${var.project}-rds-sg" })
 }
 
-# ── DB Subnet Group ───────────────────────────────────────────────────────────
 resource "aws_db_subnet_group" "main" {
   name       = "${var.project}-db-subnet-group"
   subnet_ids = var.private_subnet_ids
@@ -38,9 +28,6 @@ resource "aws_db_subnet_group" "main" {
   tags = merge(var.tags, { Name = "${var.project}-db-subnet-group" })
 }
 
-# ── RDS Instances ─────────────────────────────────────────────────────────────
-# Credentials are stored in AWS Secrets Manager (see outputs).
-# The actual secret value is passed in as a variable — never hardcoded.
 resource "aws_db_instance" "postgres" {
   for_each = toset(var.rds_databases)
 
@@ -59,16 +46,15 @@ resource "aws_db_instance" "postgres" {
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.rds.id]
 
-  multi_az               = false
-  publicly_accessible    = false
-  skip_final_snapshot    = true
-  deletion_protection    = false
+  multi_az                = false
+  publicly_accessible     = false
+  skip_final_snapshot     = true
+  deletion_protection     = false
   backup_retention_period = 7
 
   tags = merge(var.tags, { Name = "${var.project}-${each.key}" })
 }
 
-# ── Security Group: ElastiCache ───────────────────────────────────────────────
 resource "aws_security_group" "redis" {
   name        = "${var.project}-redis-sg"
   description = "Allow Redis traffic from within VPC"
@@ -92,7 +78,6 @@ resource "aws_security_group" "redis" {
   tags = merge(var.tags, { Name = "${var.project}-redis-sg" })
 }
 
-# ── ElastiCache Subnet Group ──────────────────────────────────────────────────
 resource "aws_elasticache_subnet_group" "main" {
   name       = "${var.project}-redis-subnet-group"
   subnet_ids = var.private_subnet_ids
@@ -100,7 +85,6 @@ resource "aws_elasticache_subnet_group" "main" {
   tags = merge(var.tags, { Name = "${var.project}-redis-subnet-group" })
 }
 
-# ── ElastiCache Redis Cluster ─────────────────────────────────────────────────
 resource "aws_elasticache_cluster" "redis" {
   cluster_id           = "${var.project}-redis"
   engine               = "redis"
@@ -116,7 +100,6 @@ resource "aws_elasticache_cluster" "redis" {
   tags = merge(var.tags, { Name = "${var.project}-redis" })
 }
 
-# ── DynamoDB Table ────────────────────────────────────────────────────────────
 resource "aws_dynamodb_table" "analytics" {
   name         = "ToggleMasterAnalytics"
   billing_mode = "PAY_PER_REQUEST"

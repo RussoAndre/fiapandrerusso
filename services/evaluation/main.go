@@ -7,20 +7,17 @@ import (
 	"os"
 )
 
-// HealthResponse is returned by the health check endpoint.
 type HealthResponse struct {
 	Status  string `json:"status"`
 	Service string `json:"service"`
 }
 
-// EvalRequest describes a flag evaluation request.
 type EvalRequest struct {
 	FlagKey string            `json:"flag_key"`
 	UserID  string            `json:"user_id"`
 	Context map[string]string `json:"context"`
 }
 
-// EvalResponse holds the evaluation result.
 type EvalResponse struct {
 	FlagKey string `json:"flag_key"`
 	UserID  string `json:"user_id"`
@@ -33,7 +30,6 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(HealthResponse{Status: "ok", Service: "evaluation"})
 }
 
-// evalHandler evaluates a feature flag for a given user/context (demo logic).
 func evalHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -49,7 +45,6 @@ func evalHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Demo: "new-ui" flag is enabled for premium users only.
 	value := false
 	reason := "DEFAULT_OFF"
 	if req.FlagKey == "new-ui" {
