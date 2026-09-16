@@ -120,49 +120,82 @@ No changes. Your infrastructure matches the configuration.
 
 ### 2.3 — Mostrar os recursos no Console AWS
 
-**[Troque para o navegador, abra o Console AWS na região us-east-1]**
+**[ATENÇÃO — AWS Academy: o console NÃO abre por link direto. Siga exatamente esses passos:]**
 
-**[Acesse VPC: clique em Services → VPC → Your VPCs]**
+1. Vá para a aba do **AWS Academy** no navegador
+2. Clique em **"AWS Details"**
+3. Clique no botão **"AWS Console"** (abre uma nova aba já autenticada)
+4. Na nova aba do console, verifique o seletor de região no canto superior direito — deve estar em **us-east-1 (N. Virginia)**. Se não estiver, clique e selecione.
+
+---
+
+**[No console AWS, clique na barra de pesquisa no topo, digite "VPC" e clique em VPC]**
+
+**[Clique em "Your VPCs" no menu lateral esquerdo]**
 
 **FALE:**
 > "Aqui está a VPC criada pelo Terraform, a togglemaster-vpc, com o CIDR 10.0.0.0/16."
 
-**[Clique em Subnets no menu lateral]**
+**[Clique em "Subnets" no menu lateral esquerdo]**
 
 **FALE:**
 > "Quatro subnets criadas — duas públicas e duas privadas, distribuídas em duas zonas de disponibilidade para alta disponibilidade."
 
-**[Acesse EKS: clique em Services, pesquise EKS, clique em Clusters]**
+---
+
+**[Clique na barra de pesquisa no topo, digite "EKS" e clique em Elastic Kubernetes Service]**
+
+**[Clique em "Clusters" no menu lateral]**
 
 **FALE:**
 > "O cluster EKS togglemaster-cluster, rodando Kubernetes 1.32, com status Active."
 
-**[Clique no cluster para abrir os detalhes, depois em Compute → Node groups]**
+**[Clique no nome do cluster "togglemaster-cluster"]**
+
+**[Clique na aba "Compute" e depois em "Node groups"]**
 
 **FALE:**
 > "O node group com duas instâncias t3.medium rodando. Esses nós são onde os pods dos microsserviços vão rodar."
 
-**[Acesse RDS: clique em Services → RDS → Databases]**
+---
+
+**[Clique na barra de pesquisa no topo, digite "RDS" e clique em RDS]**
+
+**[Clique em "Databases" no menu lateral]**
 
 **FALE:**
 > "Três instâncias PostgreSQL 17.5 criadas — uma para cada microsserviço que precisa de banco relacional: auth, flag e analytics."
 
-**[Acesse ElastiCache: clique em Services → ElastiCache → Redis caches]**
+---
+
+**[Clique na barra de pesquisa no topo, digite "ElastiCache" e clique em ElastiCache]**
+
+**[Clique em "Redis caches" no menu lateral]**
 
 **FALE:**
 > "O cluster Redis para cache distribuído."
 
-**[Acesse DynamoDB: clique em Services → DynamoDB → Tables]**
+---
+
+**[Clique na barra de pesquisa no topo, digite "DynamoDB" e clique em DynamoDB]**
+
+**[Clique em "Tables" no menu lateral]**
 
 **FALE:**
 > "A tabela ToggleMasterAnalytics no DynamoDB, com billing PAY_PER_REQUEST, para armazenar eventos de analytics sem precisar provisionar capacidade."
 
-**[Acesse SQS: clique em Services → SQS]**
+---
+
+**[Clique na barra de pesquisa no topo, digite "SQS" e clique em Simple Queue Service]**
 
 **FALE:**
 > "A fila SQS togglemaster-events para comunicação assíncrona entre os serviços, com uma dead-letter queue para mensagens que falham."
 
-**[Acesse ECR: clique em Services → ECR → Repositories]**
+---
+
+**[Clique na barra de pesquisa no topo, digite "ECR" e clique em Elastic Container Registry]**
+
+**[Clique em "Repositories" no menu lateral]**
 
 **FALE:**
 > "E os cinco repositórios ECR, um para cada microsserviço. Todos com scan automático de vulnerabilidades habilitado no push."
